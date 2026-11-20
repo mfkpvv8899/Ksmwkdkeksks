@@ -12,9 +12,6 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Listar arquivos (para diagnóstico)
-        run: ls -la
-
       - name: Configurar Java (JDK 17)
         uses: actions/setup-java@v4
         with:
@@ -26,16 +23,21 @@ jobs:
         with:
           gradle-version: 8.9
 
+      # PASSO DE DIAGNÓSTICO: Vai mostrar exatamente onde o gradlew está
+      - name: Encontrar o arquivo gradlew
+        run: find . -name "gradlew"
+
+      # Tenta rodar na raiz. Se o projeto estiver na raiz, funciona.
+      # Se estiver em subpasta, use o caminho que o passo acima mostrou.
       - name: Dar permissão de execução ao Gradle Wrapper
         run: chmod +x gradlew
-        working-directory: MinimalLauncher
 
       - name: Compilar APK de Debug
         run: ./gradlew assembleDebug
-        working-directory: MinimalLauncher
 
       - name: Fazer upload do APK
         uses: actions/upload-artifact@v4
         with:
           name: MinimalLauncher-apk
-          path: MinimalLauncher/app/build/outputs/apk/debug/*.apk
+          # Se o projeto estiver em subpasta, mude para: subpasta/app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/*.apk
