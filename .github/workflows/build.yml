@@ -2,41 +2,32 @@ name: Build APK
 
 on:
   push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configurar Java (JDK 17)
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Configurar Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.9
 
-      # Para qualquer daemon antigo que possa estar rodando com ambiente incorreto
-      - name: Parar daemons do Gradle
-        run: gradle --stop
+      - name: Build debug APK
+        run: |
+          DIR=$(dirname "$(find . -name settings.gradle.kts | head -1)")
+          cd "$DIR"
+          gradle assembleDebug --no-daemon
 
-      # Garante permissão de execução no wrapper (Linux é case-sensitive)
-      - name: Dar permissão ao Gradle Wrapper
-        run: chmod +x gradlew
-
-      # Usa o wrapper e captura o log completo de erro
-      - name: Compilar APK de Debug
-        run: ./gradlew assembleDebug --stacktrace --info
-
-      - name: Fazer upload do APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: MinimalLauncher-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: MinimalLauncher-debug
+          path: "**/build/outputs/apk/debug/*.apk"
