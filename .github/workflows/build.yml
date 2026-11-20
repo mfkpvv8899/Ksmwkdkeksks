@@ -8,25 +8,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: MinimalLauncher
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout do código
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Configurar Java (JDK 17)
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/actions/setup-gradle@v4
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.9
 
-      - name: Build debug APK
-        run: gradle assembleDebug
+      - name: Dar permissão de execução ao Gradle Wrapper
+        run: chmod +x gradlew
+        working-directory: MinimalLauncher
 
-      - uses: actions/upload-artifact@v4
+      - name: Compilar APK de Debug
+        run: ./gradlew assembleDebug
+        working-directory: MinimalLauncher
+
+      - name: Fazer upload do APK
+        uses: actions/upload-artifact@v4
         with:
           name: MinimalLauncher-apk
           path: MinimalLauncher/app/build/outputs/apk/debug/*.apk
