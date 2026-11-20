@@ -19,13 +19,22 @@ jobs:
         with:
           gradle-version: 8.9
 
+      - name: Extrair projeto do zip
+        run: |
+          if [ -z "$(find . -name settings.gradle.kts -not -path './.git/*' | head -1)" ]; then
+            ZIP=$(find . -maxdepth 1 -name '*.zip' | head -1)
+            echo "Extraindo $ZIP"
+            unzip -o -q "$ZIP" -d project
+          fi
+
       - name: Aceitar licenças do SDK
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - name: Build debug APK
         run: |
-          DIR=$(dirname "$(find . -name settings.gradle.kts | head -1)")
-          cd "$DIR"
+          S=$(find . -name settings.gradle.kts -not -path './.git/*' | head -1)
+          echo "Projeto em: $S"
+          cd "$(dirname "$S")"
           gradle assembleDebug --no-daemon
 
       - uses: actions/upload-artifact@v4
