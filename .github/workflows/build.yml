@@ -23,21 +23,14 @@ jobs:
         with:
           gradle-version: 8.9
 
-      # PASSO DE DIAGNÓSTICO: Vai mostrar exatamente onde o gradlew está
-      - name: Encontrar o arquivo gradlew
-        run: find . -name "gradlew"
-
-      # Tenta rodar na raiz. Se o projeto estiver na raiz, funciona.
-      # Se estiver em subpasta, use o caminho que o passo acima mostrou.
-      - name: Dar permissão de execução ao Gradle Wrapper
-        run: chmod +x gradlew
+      - name: Listar arquivos do projeto
+        run: ls -la
 
       - name: Compilar APK de Debug
-        run: ./gradlew assembleDebug
+        run: gradle assembleDebug --stacktrace
 
       - name: Fazer upload do APK
         uses: actions/upload-artifact@v4
         with:
           name: MinimalLauncher-apk
-          # Se o projeto estiver em subpasta, mude para: subpasta/app/build/outputs/apk/debug/*.apk
           path: app/build/outputs/apk/debug/*.apk
