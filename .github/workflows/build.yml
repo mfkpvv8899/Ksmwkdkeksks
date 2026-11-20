@@ -23,11 +23,17 @@ jobs:
         with:
           gradle-version: 8.9
 
-      - name: Listar arquivos do projeto
-        run: ls -la
+      # Para qualquer daemon antigo que possa estar rodando com ambiente incorreto
+      - name: Parar daemons do Gradle
+        run: gradle --stop
 
+      # Garante permissão de execução no wrapper (Linux é case-sensitive)
+      - name: Dar permissão ao Gradle Wrapper
+        run: chmod +x gradlew
+
+      # Usa o wrapper e captura o log completo de erro
       - name: Compilar APK de Debug
-        run: gradle assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace --info
 
       - name: Fazer upload do APK
         uses: actions/upload-artifact@v4
